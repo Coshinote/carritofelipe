@@ -24,12 +24,7 @@
                                 <div class="card h-100 producto-card">
                                     <!-- Imagen del producto -->
                                     <div class="producto-imagen text-center p-4 bg-light">
-                                        <img v-if="producto.imagen" 
-                                             :src="producto.imagen" 
-                                             :alt="producto.nombre"
-                                             class="img-fluid"
-                                             style="max-height: 120px;">
-                                        <i v-else :class="producto.icono" style="font-size: 4rem; color: #6c757d;"></i>
+                                        <i :class="producto.icono" style="font-size: 4rem; color: #6c757d;"></i>
                                         
                                         <span class="badge position-absolute top-0 end-0 m-2"
                                               :class="getStockDisponible(producto.id) > 0 ? 'bg-success' : 'bg-danger'">
@@ -81,12 +76,7 @@
                                 <div class="row align-items-center">
                                     <div class="col-3">
                                         <div class="text-center p-2 bg-white rounded">
-                                            <img v-if="item.imagen" 
-                                                 :src="item.imagen" 
-                                                 :alt="item.nombre"
-                                                 class="img-fluid"
-                                                 style="max-height: 50px;">
-                                            <i v-else :class="item.icono" style="font-size: 2rem; color: #6c757d;"></i>
+                                            <i :class="item.icono" style="font-size: 2rem; color: #6c757d;"></i>
                                         </div>
                                     </div>
                                     <div class="col-6">
@@ -161,6 +151,21 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Notificación simple -->
+        <div v-if="mostrarNotificacion" 
+             class="position-fixed bottom-0 end-0 p-3" 
+             style="z-index: 1050;">
+            <div class="alert alert-dismissible fade show"
+                 :class="tipoNotificacion">
+                <strong>{{ tituloNotificacion }}</strong>
+                {{ mensajeNotificacion }}
+                <button @click="cerrarNotificacion" 
+                        type="button" 
+                        class="btn-close">
+                </button>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -175,15 +180,13 @@ export default {
                     nombre: 'Audífono',
                     precio: 30000,
                     stock: 3,
-                    imagen: '/assets/img/product-1.jpg', // Puedes cambiar por la ruta real
-                    icono: 'bi bi-headphones' // Icono alternativo si no hay imagen
+                    icono: 'bi bi-headphones'
                 },
                 {
                     id: 2,
                     nombre: 'Mouse',
                     precio: 20000,
                     stock: 5,
-                    imagen: '/assets/img/product-2.jpg',
                     icono: 'bi bi-mouse'
                 },
                 {
@@ -191,7 +194,6 @@ export default {
                     nombre: 'Teclado',
                     precio: 15000,
                     stock: 10,
-                    imagen: '/assets/img/product-3.jpg',
                     icono: 'bi bi-keyboard'
                 },
                 {
@@ -199,7 +201,6 @@ export default {
                     nombre: 'Gabinete',
                     precio: 35000,
                     stock: 4,
-                    imagen: '/assets/img/product-4.jpg',
                     icono: 'bi bi-pc-display'
                 },
                 {
@@ -207,7 +208,6 @@ export default {
                     nombre: 'Pantalla',
                     precio: 175000,
                     stock: 3,
-                    imagen: '/assets/img/product-5.jpg',
                     icono: 'bi bi-display'
                 },
                 {
@@ -215,11 +215,15 @@ export default {
                     nombre: 'Silla',
                     precio: 150000,
                     stock: 2,
-                    imagen: '/assets/img/product-6.jpg',
                     icono: 'bi bi-person-workspace'
                 }
             ],
-            carrito: []
+            carrito: [],
+            // Sistema de notificaciones
+            mostrarNotificacion: false,
+            tituloNotificacion: '',
+            mensajeNotificacion: '',
+            tipoNotificacion: 'alert-success'
         }
     },
     computed: {
@@ -251,8 +255,11 @@ export default {
             if (itemEnCarrito) {
                 // Verificar stock disponible
                 if (itemEnCarrito.cantidad >= producto.stock) {
-                    // Mostrar alerta de stock agotado
-                    alert(`⚠️ Stock Agotado\n\nNo hay más unidades disponibles de "${producto.nombre}".\n\nStock máximo: ${producto.stock} unidades.\n\nYa tienes ${itemEnCarrito.cantidad} unidad(es) en tu carrito.`);
+                    this.mostrarAlerta(
+                        'Stock Agotado',
+                        `No hay más unidades disponibles de "${producto.nombre}". Stock máximo: ${producto.stock} unidades.`,
+                        'alert-warning'
+                    );
                     return;
                 }
                 // Incrementar cantidad
@@ -260,7 +267,11 @@ export default {
             } else {
                 // Verificar si hay stock disponible
                 if (producto.stock === 0) {
-                    alert(`⚠️ Sin Stock\n\nEl producto "${producto.nombre}" no tiene stock disponible.`);
+                    this.mostrarAlerta(
+                        'Sin Stock',
+                        `El producto "${producto.nombre}" no tiene stock disponible.`,
+                        'alert-danger'
+                    );
                     return;
                 }
                 
@@ -269,14 +280,17 @@ export default {
                     id: producto.id,
                     nombre: producto.nombre,
                     precio: producto.precio,
-                    imagen: producto.imagen,
                     icono: producto.icono,
                     cantidad: 1
                 });
             }
             
-            // Mensaje de confirmación (opcional)
-            console.log(`✅ "${producto.nombre}" agregado al carrito`);
+            // Mostrar confirmación
+            this.mostrarAlerta(
+                'Producto Agregado',
+                `"${producto.nombre}" agregado al carrito correctamente.`,
+                'alert-success'
+            );
         },
         
         // Remover producto del carrito
@@ -285,7 +299,11 @@ export default {
             if (index !== -1) {
                 const nombreProducto = this.carrito[index].nombre;
                 this.carrito.splice(index, 1);
-                console.log(`🗑️ "${nombreProducto}" removido del carrito`);
+                this.mostrarAlerta(
+                    'Producto Removido',
+                    `"${nombreProducto}" removido del carrito.`,
+                    'alert-info'
+                );
             }
         },
         
@@ -294,7 +312,11 @@ export default {
             if (this.carrito.length > 0) {
                 if (confirm('¿Estás seguro de que deseas vaciar el carrito?')) {
                     this.carrito = [];
-                    console.log('Carrito vaciado');
+                    this.mostrarAlerta(
+                        'Carrito Vaciado',
+                        'Todos los productos han sido removidos del carrito.',
+                        'alert-info'
+                    );
                 }
             }
         },
@@ -302,12 +324,15 @@ export default {
         // Procesar la compra
         procesarCompra() {
             if (this.carrito.length === 0) {
-                alert('El carrito está vacío. Agrega productos antes de procesar la compra.');
+                this.mostrarAlerta(
+                    'Carrito Vacío',
+                    'Agrega productos antes de procesar la compra.',
+                    'alert-warning'
+                );
                 return;
             }
             
-            let detalleCompra = 'RESUMEN DE COMPRA\n';
-            detalleCompra += '═══════════════════\n\n';
+            let detalleCompra = 'RESUMEN DE COMPRA\n═══════════════════\n\n';
             
             this.carrito.forEach(item => {
                 detalleCompra += `${item.nombre}\n`;
@@ -323,7 +348,11 @@ export default {
             detalleCompra += '¿Confirmar la compra?';
             
             if (confirm(detalleCompra)) {
-                alert('¡Compra procesada exitosamente!\n\nGracias por tu compra. Tu pedido ha sido confirmado.');
+                this.mostrarAlerta(
+                    '¡Compra Exitosa!',
+                    'Tu pedido ha sido confirmado. Gracias por tu compra.',
+                    'alert-success'
+                );
                 this.carrito = [];
             }
         },
@@ -342,10 +371,28 @@ export default {
                 style: 'currency',
                 currency: 'CLP'
             }).format(precio);
+        },
+        
+        // Sistema de notificaciones simple
+        mostrarAlerta(titulo, mensaje, tipo) {
+            this.tituloNotificacion = titulo;
+            this.mensajeNotificacion = mensaje;
+            this.tipoNotificacion = tipo;
+            this.mostrarNotificacion = true;
+            
+            // Auto-cerrar después de 3 segundos
+            setTimeout(() => {
+                this.cerrarNotificacion();
+            }, 3000);
+        },
+        
+        cerrarNotificacion() {
+            this.mostrarNotificacion = false;
         }
     },
     mounted() {
         console.log('Componente CarritoCompras montado correctamente');
+        console.log('Productos cargados:', this.productos.length);
     }
 }
 </script>
@@ -357,6 +404,22 @@ export default {
     background-color: #f8f9fa;
     min-height: 100vh;
     padding: 20px;
+}
+
+/* Imágenes de productos */
+.producto-img {
+    max-height: 120px;
+    max-width: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.carrito-img {
+    max-height: 50px;
+    max-width: 50px;
+    object-fit: cover;
+    border-radius: 4px;
 }
 
 /* Tarjetas de productos */
