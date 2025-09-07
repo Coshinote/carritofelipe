@@ -1,0 +1,169 @@
+/* Estilos específicos del componente CarritoCompras */
+
+/* Imágenes de productos */
+.producto-img {
+  max-height: 150px;
+  max-width: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.carrito-img {
+  max-height: 50px;
+  max-width: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+/* Tarjetas de productos */
+.producto-card {
+  transition: all 0.3s ease;
+  border: none;
+  overflow: hidden;
+}
+
+.producto-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+}
+
+.producto-imagen {
+  position: relative;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Items del carrito */
+.carrito-item {
+  transition: all 0.3s ease;
+  border: 1px solid #dee2e6;
+  animation: slideIn 0.3s ease-out;
+}
+
+.carrito-item:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Scrollbar del carrito */
+.carrito-scroll {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.carrito-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.carrito-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.carrito-scroll::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.carrito-scroll::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Estilo para el alert de stock 0 */
+.alert-stock-zero {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  margin: 0.5rem;
+  font-size: 0.875rem;
+}
+
+/* Modal personalizado */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+.modal-custom {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header-custom {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #dee2e6;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.modal-header-custom.bg-success {
+  background-color: #198754 !important;
+}
+
+.modal-header-custom.bg-warning {
+  background-color: #ffc107 !important;
+}
+
+.modal-header-custom.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+.modal-header-custom.bg-info {
+  background-color: #0dcaf0 !important;
+}
+
+.modal-title-custom {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modal-body-custom {
+  padding: 1.5rem;
+}
+
+.modal-footer-custom {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Responsive específico para carrito */
+@media (max-width: 768px) {
+  .sticky-top {
+    position: relative !important;
+    margin-top: 20px;
+  }
+
+  .producto-imagen {
+    min-height: 150px;
+  }
+
+  .producto-img {
+    max-height: 120px;
+    max-width: 120px;
+  }
+}

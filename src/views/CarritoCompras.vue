@@ -88,7 +88,7 @@
                             <span class="badge bg-light text-dark">{{ totalItems }}</span>
                         </h4>
                     </div>
-                    <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+                    <div class="card-body carrito-scroll">
                         <!-- Carrito vacío -->
                         <div v-if="carrito.length === 0" class="text-center py-5">
                             <i class="bi bi-cart-x" style="font-size: 4rem; color: #dee2e6;"></i>
@@ -210,6 +210,7 @@ import product3 from '@/assets/img/product-3.jpg'
 import product4 from '@/assets/img/product-4.jpg'
 import product5 from '@/assets/img/product-5.jpg'
 import product6 from '@/assets/img/product-6.jpg'
+
 export default {
     name: 'CarritoCompras',
     data() {
@@ -421,18 +422,6 @@ export default {
             }).format(precio);
         },
 
-        // Sistema de modal personalizado para stock
-        mostrarModalStock(titulo, mensaje, tipo) {
-            this.tituloModal = titulo;
-            this.mensajeModal = mensaje;
-            this.tipoModal = tipo;
-            this.mostrarModal = true;
-        },
-
-        cerrarModal() {
-            this.mostrarModal = false;
-        },
-
         // Sistema de notificaciones simple
         mostrarAlerta(titulo, mensaje, tipo) {
             this.tituloNotificacion = titulo;
@@ -458,196 +447,6 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos específicos del componente */
-.container-fluid {
-    max-width: 1400px;
-    background-color: #f8f9fa;
-    min-height: 100vh;
-    padding: 20px;
-}
-/* Imágenes de productos */
-.producto-img {
-    max-height: 150px;
-    max-width: 150px;
-    object-fit: cover;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-.carrito-img {
-    max-height: 50px;
-    max-width: 50px;
-    object-fit: cover;
-    border-radius: 4px;
-}
-/* Tarjetas de productos */
-.producto-card {
-    transition: all 0.3s ease;
-    border: none;
-    overflow: hidden;
-}
-.producto-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
-}
-.producto-imagen {
-    position: relative;
-    min-height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-/* Items del carrito */
-.carrito-item {
-    transition: all 0.3s ease;
-    border: 1px solid #dee2e6;
-}
-.carrito-item:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-/* Botones */
-.btn {
-    transition: all 0.3s ease;
-    font-weight: 500;
-}
-.btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-.btn:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-/* Badge de stock */
-.badge {
-    font-size: 0.75rem;
-    padding: 0.4em 0.6em;
-}
-/* Scrollbar personalizado para el carrito */
-.card-body::-webkit-scrollbar {
-    width: 8px;
-}
-.card-body::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-.card-body::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 10px;
-}
-.card-body::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-/* Animaciones */
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-.carrito-item {
-    animation: slideIn 0.3s ease-out;
-}
-/* Responsive */
-@media (max-width: 768px) {
-    .sticky-top {
-        position: relative !important;
-        margin-top: 20px;
-    }
-
-    .producto-imagen {
-        min-height: 150px;
-    }
-
-    .producto-img {
-        max-height: 120px;
-        max-width: 120px;
-    }
-}
-/* Efectos hover para cards */
-.card {
-    transition: box-shadow 0.3s ease;
-}
-.card:hover {
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-/* Estilos para el display de precios */
-.fs-4 {
-    font-size: 1.3rem !important;
-}
-.fs-5 {
-    font-size: 1.15rem !important;
-}
-/* Estilos para el modal personalizado */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1050;
-}
-.modal-custom {
-    background: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-    max-width: 500px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-.modal-header-custom {
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid #dee2e6;
-    border-top-left-radius: 0.5rem;
-    border-top-right-radius: 0.5rem;
-}
-.modal-header-custom.bg-success {
-    background-color: #198754 !important;
-}
-.modal-header-custom.bg-warning {
-    background-color: #ffc107 !important;
-}
-.modal-header-custom.bg-danger {
-    background-color: #dc3545 !important;
-}
-.modal-header-custom.bg-info {
-    background-color: #0dcaf0 !important;
-}
-.modal-title-custom {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 500;
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.modal-body-custom {
-    padding: 1.5rem;
-}
-.modal-footer-custom {
-    padding: 1rem 1.5rem;
-    border-top: 1px solid #dee2e6;
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-}
-/* Estilo para el alert de stock 0 */
-.alert-danger {
-    background-color: #f8d7da;
-    color: #721c24;
-    border-color: #f5c6cb;
-    border-radius: 0.25rem;
-    padding: 0.5rem;
-    margin: 0.5rem;
-    font-size: 0.875rem;
-}
+/* Importar estilos específicos del carrito */
+@import '@/assets/carrito-styles.css';
 </style>

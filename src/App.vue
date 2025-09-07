@@ -11,19 +11,6 @@ export default {
 </script>
 
 <style>
-/* Reset y estilos globales */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f8f9fa;
-}
-
-#app {
-  min-height: 100vh;
-}
+/* Importar estilos base */
+@import './assets/base.css';
 </style>
