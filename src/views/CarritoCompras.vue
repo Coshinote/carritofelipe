@@ -1,8 +1,8 @@
 <template>
     <div class="container-fluid mt-4">
         <!-- Header -->
-        <div class="text-center mb-4">
-            <h1 class="display-4">
+        <div class="text-center mb-4 fade-in">
+            <h1 class="display-4 text-gradient">
                 <i class="bi bi-shop"></i> Tienda Online
             </h1>
             <p class="lead text-muted">Los mejores productos al mejor precio</p>
@@ -11,8 +11,8 @@
         <div class="row">
             <!-- Columna 1: Productos Disponibles -->
             <div class="col-lg-8 col-md-7">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
+                <div class="card shadow-soft">
+                    <div class="card-header bg-gradient-primary text-white">
                         <h4 class="mb-0">
                             <i class="bi bi-box-seam"></i> Productos Disponibles
                         </h4>
@@ -21,19 +21,23 @@
                         <div class="row">
                             <div v-for="producto in productos" :key="producto.id"
                                  class="col-md-6 col-lg-4 mb-4">
-                                <div class="card h-100 producto-card">
+                                <div class="card h-100 producto-card zoom-in">
                                     <!-- Imagen del producto -->
                                     <div class="producto-imagen text-center p-3 bg-light">
+                                        <!-- Mostrar imagen real si existe, sino mostrar icono -->
                                         <img v-if="producto.imagen"
                                              :src="producto.imagen"
                                              :alt="producto.nombre"
                                              class="producto-img img-fluid"
-                                             @error="onImageError">
-                                        <i v-else
+                                             @error="onImageError($event, producto)"
+                                             :style="{ display: producto.mostrarIcono ? 'none' : 'block' }">
+                                        
+                                        <i v-if="!producto.imagen || producto.mostrarIcono"
                                            :class="producto.icono"
-                                           style="font-size: 4rem; color: #6c757d;"></i>
+                                           style="font-size: 4rem; color: #6c757d;"
+                                           :style="{ display: producto.mostrarIcono ? 'block' : 'none' }"></i>
 
-                                        <div class="position-absolute top-0 end-0 m-2">
+                                        <div class="stock-badge">
                                             <span class="badge mb-1 d-block"
                                                   :class="getStockDisponible(producto.id) > 0 ? 'bg-success' : 'bg-danger'">
                                                 Stock: {{ getStockDisponible(producto.id) }}
@@ -47,18 +51,18 @@
 
                                     <!-- Alert para stock 0 -->
                                     <div v-if="getStockDisponible(producto.id) === 0"
-                                         class="alert alert-danger m-2 mb-0 text-center">
-                                        <strong>No hay más unidades disponibles en stock</strong>
+                                         class="alert-stock-zero">
+                                        <strong><i class="bi bi-exclamation-triangle"></i> No hay más unidades disponibles en stock</strong>
                                     </div>
 
                                     <div class="card-body d-flex flex-column">
-                                        <h5 class="card-title">{{ producto.nombre }}</h5>
+                                        <h5 class="card-title fw-semibold">{{ producto.nombre }}</h5>
                                         <p class="card-text text-primary fw-bold fs-4 mb-3">
                                             {{ formatearPrecio(producto.precio) }}
                                         </p>
 
                                         <button @click="agregarAlCarrito(producto)"
-                                                class="btn mt-auto w-100"
+                                                class="btn btn-carrito mt-auto w-100"
                                                 :class="getStockDisponible(producto.id) === 0 ? 'btn-secondary' : 'btn-primary'"
                                                 :disabled="getStockDisponible(producto.id) === 0">
                                             <i class="bi" :class="getStockDisponible(producto.id) === 0 ? 'bi-x-circle' : 'bi-cart-plus'"></i>
@@ -82,40 +86,43 @@
 
             <!-- Columna 2: Carrito de Compras -->
             <div class="col-lg-4 col-md-5">
-                <div class="card shadow-sm sticky-top" style="top: 20px;">
-                    <div class="card-header bg-success text-white">
+                <div class="card shadow-soft sticky-top sticky-top-mobile-reset" style="top: 20px;">
+                    <div class="card-header bg-gradient-success text-white">
                         <h4 class="mb-0 d-flex justify-content-between align-items-center">
                             <span><i class="bi bi-cart3"></i> Carrito de Compras</span>
-                            <span class="badge bg-light text-dark">{{ totalItems }}</span>
+                            <span class="badge bg-light text-dark bounce" v-if="totalItems > 0">{{ totalItems }}</span>
+                            <span class="badge bg-light text-dark" v-else>0</span>
                         </h4>
                     </div>
-                    <div class="card-body carrito-scroll">
+                    <div class="card-body carrito-scroll scrollbar-custom">
                         <!-- Carrito vacío -->
-                        <div v-if="carrito.length === 0" class="text-center py-5">
+                        <div v-if="carrito.length === 0" class="text-center py-5 fade-in">
                             <i class="bi bi-cart-x" style="font-size: 4rem; color: #dee2e6;"></i>
-                            <p class="text-muted mt-3">Tu carrito está vacío</p>
+                            <p class="text-muted mt-3 fw-medium">Tu carrito está vacío</p>
                             <small class="text-muted">Agrega productos para comenzar</small>
                         </div>
 
                         <!-- Items del carrito -->
                         <div v-else>
                             <div v-for="item in carrito" :key="item.id"
-                                 class="carrito-item mb-3 p-3 bg-light rounded">
+                                 class="carrito-item mb-3 p-3 bg-light rounded border-radius-md">
                                 <div class="row align-items-center">
                                     <div class="col-3">
-                                        <div class="text-center p-2 bg-white rounded">
-                                            <img v-if="item.imagen"
+                                        <div class="text-center p-2 bg-white rounded border-radius-sm shadow-sm">
+                                            <!-- Imagen en el carrito -->
+                                            <img v-if="item.imagen && !item.mostrarIcono"
                                                  :src="item.imagen"
                                                  :alt="item.nombre"
                                                  class="carrito-img img-fluid"
-                                                 @error="onImageError">
-                                            <i v-else
+                                                 @error="onImageError($event, item)">
+                                            
+                                            <i v-if="!item.imagen || item.mostrarIcono"
                                                :class="item.icono"
                                                style="font-size: 2rem; color: #6c757d;"></i>
                                         </div>
                                     </div>
                                     <div class="col-6">
-                                        <h6 class="mb-1">{{ item.nombre }}</h6>
+                                        <h6 class="mb-1 fw-semibold">{{ item.nombre }}</h6>
                                         <small class="text-muted d-block">
                                             {{ formatearPrecio(item.precio) }} c/u
                                         </small>
@@ -125,7 +132,7 @@
                                     </div>
                                     <div class="col-3 text-end">
                                         <button @click="removerDelCarrito(item.id)"
-                                                class="btn btn-danger btn-sm"
+                                                class="btn btn-danger btn-sm btn-carrito"
                                                 title="Remover del carrito">
                                             <i class="bi bi-trash"></i>
                                         </button>
@@ -146,12 +153,12 @@
                     <div v-if="carrito.length > 0" class="card-footer bg-light">
                         <div class="mb-3">
                             <div class="d-flex justify-content-between mb-2">
-                                <span>Subtotal:</span>
-                                <span>{{ formatearPrecio(subtotal) }}</span>
+                                <span class="fw-medium">Subtotal:</span>
+                                <span class="fw-medium">{{ formatearPrecio(subtotal) }}</span>
                             </div>
                             <div class="d-flex justify-content-between mb-2">
-                                <span>IVA (19%):</span>
-                                <span>{{ formatearPrecio(iva) }}</span>
+                                <span class="fw-medium">IVA (19%):</span>
+                                <span class="fw-medium">{{ formatearPrecio(iva) }}</span>
                             </div>
                             <hr>
                             <div class="d-flex justify-content-between fw-bold fs-5">
@@ -161,10 +168,10 @@
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button @click="procesarCompra" class="btn btn-success btn-lg">
+                            <button @click="procesarCompra" class="btn btn-success btn-lg btn-carrito">
                                 <i class="bi bi-credit-card"></i> Procesar Compra
                             </button>
-                            <button @click="vaciarCarrito" class="btn btn-outline-danger">
+                            <button @click="vaciarCarrito" class="btn btn-outline-danger btn-carrito">
                                 <i class="bi bi-cart-x"></i> Vaciar Carrito
                             </button>
                         </div>
@@ -172,29 +179,37 @@
                 </div>
 
                 <!-- Información adicional -->
-                <div class="card mt-3 shadow-sm">
+                <div class="card mt-3 shadow-soft">
                     <div class="card-body">
-                        <h6 class="card-title">
-                            <i class="bi bi-info-circle"></i> Información
+                        <h6 class="card-title fw-semibold">
+                            <i class="bi bi-info-circle text-primary"></i> Información
                         </h6>
-                        <ul class="small mb-0">
-                            <li>Envío gratis en compras sobre $50.000</li>
-                            <li>Todos los precios incluyen IVA</li>
-                            <li>Stock limitado en algunos productos</li>
+                        <ul class="small mb-0 text-muted">
+                            <li>✓ Envío gratis en compras sobre $50.000</li>
+                            <li>✓ Todos los precios incluyen IVA</li>
+                            <li>⚠️ Stock limitado en algunos productos</li>
+                            <li>🔒 Compra segura garantizada</li>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Notificación simple -->
+        <!-- Notificación optimizada -->
         <div v-if="mostrarNotificacion"
              class="position-fixed bottom-0 end-0 p-3"
              style="z-index: 1050;">
-            <div class="alert alert-dismissible fade show"
-                 :class="tipoNotificacion">
-                <strong>{{ tituloNotificacion }}</strong>
-                {{ mensajeNotificacion }}
+            <div class="alert alert-dismissible fade show box-shadow-lg border-radius-lg"
+                 :class="tipoNotificacion"
+                 style="max-width: 350px;">
+                <div class="d-flex align-items-center">
+                    <i class="bi me-2" 
+                       :class="getIconoNotificacion()"></i>
+                    <div class="flex-grow-1">
+                        <strong class="d-block">{{ tituloNotificacion }}</strong>
+                        <span class="small">{{ mensajeNotificacion }}</span>
+                    </div>
+                </div>
                 <button @click="cerrarNotificacion"
                         type="button"
                         class="btn-close">
@@ -205,7 +220,7 @@
 </template>
 
 <script>
-// Importar imágenes de productos
+// ========== IMPORTAR IMÁGENES REALES ==========
 import product1 from '@/assets/img/product-1.jpg'
 import product2 from '@/assets/img/product-2.jpg'
 import product3 from '@/assets/img/product-3.jpg'
@@ -220,51 +235,57 @@ export default {
             productos: [
                 {
                     id: 1,
-                    nombre: 'Audífono',
+                    nombre: 'Audífono Inalámbrico',
                     precio: 30000,
                     stock: 3,
                     icono: 'bi bi-headphones',
-                    imagen: product1
+                    imagen: product1,
+                    mostrarIcono: false // Control para mostrar icono si falla la imagen
                 },
                 {
                     id: 2,
-                    nombre: 'Mouse',
+                    nombre: 'Mouse Gaming',
                     precio: 20000,
                     stock: 5,
                     icono: 'bi bi-mouse',
-                    imagen: product2
+                    imagen: product2,
+                    mostrarIcono: false
                 },
                 {
                     id: 3,
-                    nombre: 'Teclado',
+                    nombre: 'Teclado Mecánico',
                     precio: 15000,
                     stock: 10,
                     icono: 'bi bi-keyboard',
-                    imagen: product3
+                    imagen: product3,
+                    mostrarIcono: false
                 },
                 {
                     id: 4,
-                    nombre: 'Gabinete',
+                    nombre: 'Gabinete PC',
                     precio: 35000,
                     stock: 4,
                     icono: 'bi bi-pc-display',
-                    imagen: product4
+                    imagen: product4,
+                    mostrarIcono: false
                 },
                 {
                     id: 5,
-                    nombre: 'Pantalla',
+                    nombre: 'Monitor 24"',
                     precio: 175000,
                     stock: 3,
                     icono: 'bi bi-display',
-                    imagen: product5
+                    imagen: product5,
+                    mostrarIcono: false
                 },
                 {
                     id: 6,
-                    nombre: 'Silla',
+                    nombre: 'Silla Gamer',
                     precio: 150000,
                     stock: 2,
                     icono: 'bi bi-person-workspace',
-                    imagen: product6
+                    imagen: product6,
+                    mostrarIcono: false
                 }
             ],
             carrito: [],
@@ -298,10 +319,17 @@ export default {
     },
     methods: {
         // Manejar errores de imagen
-        onImageError(event) {
-            console.warn('Error cargando imagen:', event.target.src);
-            // Ocultar la imagen y mostrar el icono de respaldo
+        onImageError(event, producto) {
+            console.warn(`⚠️ Error cargando imagen para ${producto.nombre}:`, event.target.src);
+            
+            // Marcar para mostrar el icono de respaldo
+            producto.mostrarIcono = true;
+            
+            // Ocultar la imagen que falló
             event.target.style.display = 'none';
+            
+            // Log para debugging
+            console.log(`🔄 Mostrando icono de respaldo para: ${producto.nombre}`);
         },
 
         // Agregar producto al carrito
@@ -311,8 +339,6 @@ export default {
             if (itemEnCarrito) {
                 // Verificar stock disponible
                 if (itemEnCarrito.cantidad >= producto.stock) {
-                    alert(`⚠️ STOCK AGOTADO\n\nNo hay más unidades disponibles de "${producto.nombre}".\n\nStock total: ${producto.stock} unidades\nCantidad en carrito: ${itemEnCarrito.cantidad} unidades\n\nNo se puede agregar más cantidad de este producto.`);
-
                     this.mostrarAlerta(
                         '⚠️ Stock Agotado',
                         `Ya tienes ${itemEnCarrito.cantidad} unidades de "${producto.nombre}" en el carrito. Stock máximo disponible: ${producto.stock}.`,
@@ -325,8 +351,6 @@ export default {
             } else {
                 // Verificar si hay stock disponible
                 if (producto.stock === 0) {
-                    alert(`❌ SIN STOCK\n\nEl producto "${producto.nombre}" no tiene stock disponible.`);
-
                     this.mostrarAlerta(
                         '❌ Sin Stock',
                         `El producto "${producto.nombre}" no tiene stock disponible.`,
@@ -335,13 +359,14 @@ export default {
                     return;
                 }
 
-                // Agregar nuevo producto al carrito
+                // Agregar nuevo producto al carrito (incluyendo estado de imagen)
                 this.carrito.push({
                     id: producto.id,
                     nombre: producto.nombre,
                     precio: producto.precio,
                     icono: producto.icono,
                     imagen: producto.imagen,
+                    mostrarIcono: producto.mostrarIcono,
                     cantidad: 1
                 });
             }
@@ -385,11 +410,15 @@ export default {
         // Procesar la compra
         procesarCompra() {
             if (this.carrito.length === 0) {
-                alert('El carrito está vacío.\n\nAgrega algunos productos antes de procesar la compra.');
+                this.mostrarAlerta(
+                    '⚠️ Carrito Vacío',
+                    'Agrega algunos productos antes de procesar la compra.',
+                    'alert-warning'
+                );
                 return;
             }
 
-            let detalleCompra = '';
+            let detalleCompra = 'RESUMEN DE COMPRA:\n\n';
             this.carrito.forEach(item => {
                 detalleCompra += `${item.nombre}: ${item.cantidad} x ${this.formatearPrecio(item.precio)} = ${this.formatearPrecio(item.precio * item.cantidad)}\n`;
             });
@@ -398,7 +427,7 @@ export default {
             detalleCompra += `\nIVA (19%): ${this.formatearPrecio(this.iva)}`;
             detalleCompra += `\nTOTAL: ${this.formatearPrecio(this.totalPagar)}`;
 
-            if (confirm('¿Confirmar la compra?\n\nRESUMEN:\n' + detalleCompra)) {
+            if (confirm('¿Confirmar la compra?\n\n' + detalleCompra)) {
                 this.mostrarAlerta(
                     '🎉 ¡Compra Exitosa!',
                     'Tu pedido ha sido confirmado. Gracias por tu compra.',
@@ -429,17 +458,33 @@ export default {
             }).format(precio);
         },
 
-        // Sistema de notificaciones simple
+        // Obtener icono para notificación
+        getIconoNotificacion() {
+            switch(this.tipoNotificacion) {
+                case 'alert-success':
+                    return 'bi-check-circle-fill text-success';
+                case 'alert-warning':
+                    return 'bi-exclamation-triangle-fill text-warning';
+                case 'alert-danger':
+                    return 'bi-x-circle-fill text-danger';
+                case 'alert-info':
+                    return 'bi-info-circle-fill text-info';
+                default:
+                    return 'bi-bell-fill';
+            }
+        },
+
+        // Sistema de notificaciones mejorado
         mostrarAlerta(titulo, mensaje, tipo) {
             this.tituloNotificacion = titulo;
             this.mensajeNotificacion = mensaje;
             this.tipoNotificacion = tipo;
             this.mostrarNotificacion = true;
 
-            // Auto-cerrar después de 4 segundos
+            // Auto-cerrar después de 5 segundos
             setTimeout(() => {
                 this.cerrarNotificacion();
-            }, 4000);
+            }, 5000);
         },
 
         cerrarNotificacion() {
@@ -447,14 +492,31 @@ export default {
         }
     },
     mounted() {
-        console.log('Componente CarritoCompras montado correctamente');
-        console.log('Productos cargados:', this.productos.length);
-        console.log('Imágenes importadas correctamente');
+        console.log('✅ Componente CarritoCompras montado correctamente');
+        console.log('📦 Productos cargados:', this.productos.length);
+        console.log('🖼️ Imágenes importadas:', {
+            product1: !!product1,
+            product2: !!product2,
+            product3: !!product3,
+            product4: !!product4,
+            product5: !!product5,
+            product6: !!product6
+        });
+        console.log('🎨 CSS externos cargados correctamente');
+        
+        // Aplicar animaciones de entrada
+        setTimeout(() => {
+            document.querySelectorAll('.producto-card').forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('zoom-in');
+                }, index * 100);
+            });
+        }, 300);
     }
 }
 </script>
 
 <style scoped>
-/* Importar estilos específicos del carrito */
+/* Solo importamos los CSS externos */
 @import '@/assets/carrito-styles.css';
 </style>
