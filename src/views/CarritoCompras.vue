@@ -7,6 +7,7 @@
             </h1>
             <p class="lead text-muted">Los mejores productos al mejor precio</p>
         </div>
+
         <div class="row">
             <!-- Columna 1: Productos Disponibles -->
             <div class="col-lg-8 col-md-7">
@@ -30,7 +31,8 @@
                                              @error="onImageError">
                                         <i v-else
                                            :class="producto.icono"
-                                           style="font-size: 4rem; color: #6c757d; display: none;"></i>
+                                           style="font-size: 4rem; color: #6c757d;"></i>
+
                                         <div class="position-absolute top-0 end-0 m-2">
                                             <span class="badge mb-1 d-block"
                                                   :class="getStockDisponible(producto.id) > 0 ? 'bg-success' : 'bg-danger'">
@@ -42,16 +44,19 @@
                                             </span>
                                         </div>
                                     </div>
+
                                     <!-- Alert para stock 0 -->
                                     <div v-if="getStockDisponible(producto.id) === 0"
                                          class="alert alert-danger m-2 mb-0 text-center">
                                         <strong>No hay más unidades disponibles en stock</strong>
                                     </div>
+
                                     <div class="card-body d-flex flex-column">
                                         <h5 class="card-title">{{ producto.nombre }}</h5>
                                         <p class="card-text text-primary fw-bold fs-4 mb-3">
                                             {{ formatearPrecio(producto.precio) }}
                                         </p>
+
                                         <button @click="agregarAlCarrito(producto)"
                                                 class="btn mt-auto w-100"
                                                 :class="getStockDisponible(producto.id) === 0 ? 'btn-secondary' : 'btn-primary'"
@@ -74,6 +79,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- Columna 2: Carrito de Compras -->
             <div class="col-lg-4 col-md-5">
                 <div class="card shadow-sm sticky-top" style="top: 20px;">
@@ -90,6 +96,7 @@
                             <p class="text-muted mt-3">Tu carrito está vacío</p>
                             <small class="text-muted">Agrega productos para comenzar</small>
                         </div>
+
                         <!-- Items del carrito -->
                         <div v-else>
                             <div v-for="item in carrito" :key="item.id"
@@ -134,6 +141,7 @@
                             </div>
                         </div>
                     </div>
+
                     <!-- Total y botones -->
                     <div v-if="carrito.length > 0" class="card-footer bg-light">
                         <div class="mb-3">
@@ -151,6 +159,7 @@
                                 <span class="text-success">{{ formatearPrecio(totalPagar) }}</span>
                             </div>
                         </div>
+
                         <div class="d-grid gap-2">
                             <button @click="procesarCompra" class="btn btn-success btn-lg">
                                 <i class="bi bi-credit-card"></i> Procesar Compra
@@ -161,6 +170,7 @@
                         </div>
                     </div>
                 </div>
+
                 <!-- Información adicional -->
                 <div class="card mt-3 shadow-sm">
                     <div class="card-body">
@@ -176,6 +186,7 @@
                 </div>
             </div>
         </div>
+
         <!-- Notificación simple -->
         <div v-if="mostrarNotificacion"
              class="position-fixed bottom-0 end-0 p-3"
@@ -195,12 +206,12 @@
 
 <script>
 // Importar imágenes de productos
-import product1 from '@/assets/img/product-1.jpg';
-import product2 from '@/assets/img/product-2.jpg';
-import product3 from '@/assets/img/product-3.jpg';
-import product4 from '@/assets/img/product-4.jpg';
-import product5 from '@/assets/img/product-5.jpg';
-import product6 from '@/assets/img/product-6.jpg';
+import product1 from '@/assets/img/product-1.jpg'
+import product2 from '@/assets/img/product-2.jpg'
+import product3 from '@/assets/img/product-3.jpg'
+import product4 from '@/assets/img/product-4.jpg'
+import product5 from '@/assets/img/product-5.jpg'
+import product6 from '@/assets/img/product-6.jpg'
 
 export default {
     name: 'CarritoCompras',
@@ -262,21 +273,24 @@ export default {
             tituloNotificacion: '',
             mensajeNotificacion: '',
             tipoNotificacion: 'alert-success'
-        };
+        }
     },
     computed: {
         // Total de items en el carrito
         totalItems() {
             return this.carrito.reduce((total, item) => total + item.cantidad, 0);
         },
+
         // Subtotal sin IVA
         subtotal() {
             return this.carrito.reduce((total, item) => total + (item.precio * item.cantidad), 0);
         },
+
         // IVA (19%)
         iva() {
-            return parseFloat((this.subtotal * 0.19).toFixed(2));
+            return Math.round(this.subtotal * 0.19);
         },
+
         // Total a pagar
         totalPagar() {
             return this.subtotal + this.iva;
@@ -286,26 +300,22 @@ export default {
         // Manejar errores de imagen
         onImageError(event) {
             console.warn('Error cargando imagen:', event.target.src);
+            // Ocultar la imagen y mostrar el icono de respaldo
             event.target.style.display = 'none';
-            const iconoRespaldo = event.target.parentNode.querySelector('i');
-            if (iconoRespaldo) iconoRespaldo.style.display = 'block';
         },
+
         // Agregar producto al carrito
         agregarAlCarrito(producto) {
             const itemEnCarrito = this.carrito.find(item => item.id === producto.id);
+
             if (itemEnCarrito) {
                 // Verificar stock disponible
                 if (itemEnCarrito.cantidad >= producto.stock) {
+                    alert(`⚠️ STOCK AGOTADO\n\nNo hay más unidades disponibles de "${producto.nombre}".\n\nStock total: ${producto.stock} unidades\nCantidad en carrito: ${itemEnCarrito.cantidad} unidades\n\nNo se puede agregar más cantidad de este producto.`);
+
                     this.mostrarAlerta(
                         '⚠️ Stock Agotado',
                         `Ya tienes ${itemEnCarrito.cantidad} unidades de "${producto.nombre}" en el carrito. Stock máximo disponible: ${producto.stock}.`,
-                        'alert-warning'
-                    );
-                    return;
-                } else if (itemEnCarrito.cantidad + 1 > producto.stock) {
-                    this.mostrarAlerta(
-                        '⚠️ Stock Insuficiente',
-                        `Solo puedes agregar ${producto.stock - itemEnCarrito.cantidad} unidad(es) más de "${producto.nombre}".`,
                         'alert-warning'
                     );
                     return;
@@ -315,6 +325,8 @@ export default {
             } else {
                 // Verificar si hay stock disponible
                 if (producto.stock === 0) {
+                    alert(`❌ SIN STOCK\n\nEl producto "${producto.nombre}" no tiene stock disponible.`);
+
                     this.mostrarAlerta(
                         '❌ Sin Stock',
                         `El producto "${producto.nombre}" no tiene stock disponible.`,
@@ -322,6 +334,7 @@ export default {
                     );
                     return;
                 }
+
                 // Agregar nuevo producto al carrito
                 this.carrito.push({
                     id: producto.id,
@@ -332,14 +345,15 @@ export default {
                     cantidad: 1
                 });
             }
+
             // Mostrar confirmación
             this.mostrarAlerta(
                 '✅ Producto Agregado',
                 `"${producto.nombre}" agregado al carrito. Cantidad actual: ${this.carrito.find(item => item.id === producto.id).cantidad}/${producto.stock}`,
                 'alert-success'
             );
-            this.guardarCarrito();
         },
+
         // Remover producto del carrito
         removerDelCarrito(productoId) {
             const index = this.carrito.findIndex(item => item.id === productoId);
@@ -351,9 +365,9 @@ export default {
                     `"${nombreProducto}" removido del carrito.`,
                     'alert-info'
                 );
-                this.guardarCarrito();
             }
         },
+
         // Vaciar todo el carrito
         vaciarCarrito() {
             if (this.carrito.length > 0) {
@@ -364,27 +378,26 @@ export default {
                         'Todos los productos han sido removidos del carrito.',
                         'alert-info'
                     );
-                    this.guardarCarrito();
                 }
             }
         },
+
         // Procesar la compra
         procesarCompra() {
             if (this.carrito.length === 0) {
-                this.mostrarAlerta(
-                    'Carrito Vacío',
-                    'Agrega algunos productos antes de procesar la compra.',
-                    'alert-warning'
-                );
+                alert('El carrito está vacío.\n\nAgrega algunos productos antes de procesar la compra.');
                 return;
             }
+
             let detalleCompra = '';
             this.carrito.forEach(item => {
                 detalleCompra += `${item.nombre}: ${item.cantidad} x ${this.formatearPrecio(item.precio)} = ${this.formatearPrecio(item.precio * item.cantidad)}\n`;
             });
+
             detalleCompra += `\nSubtotal: ${this.formatearPrecio(this.subtotal)}`;
             detalleCompra += `\nIVA (19%): ${this.formatearPrecio(this.iva)}`;
             detalleCompra += `\nTOTAL: ${this.formatearPrecio(this.totalPagar)}`;
+
             if (confirm('¿Confirmar la compra?\n\nRESUMEN:\n' + detalleCompra)) {
                 this.mostrarAlerta(
                     '🎉 ¡Compra Exitosa!',
@@ -392,13 +405,14 @@ export default {
                     'alert-success'
                 );
                 this.carrito = [];
-                this.guardarCarrito();
             }
         },
+
         // Obtener item del carrito por ID
         getItemEnCarrito(productoId) {
             return this.carrito.find(item => item.id === productoId);
         },
+
         // Obtener stock disponible (stock total - cantidad en carrito)
         getStockDisponible(productoId) {
             const producto = this.productos.find(p => p.id === productoId);
@@ -406,6 +420,7 @@ export default {
             const cantidadEnCarrito = itemEnCarrito ? itemEnCarrito.cantidad : 0;
             return producto.stock - cantidadEnCarrito;
         },
+
         // Formatear precio a formato chileno
         formatearPrecio(precio) {
             return new Intl.NumberFormat('es-CL', {
@@ -413,49 +428,33 @@ export default {
                 currency: 'CLP'
             }).format(precio);
         },
+
         // Sistema de notificaciones simple
         mostrarAlerta(titulo, mensaje, tipo) {
             this.tituloNotificacion = titulo;
             this.mensajeNotificacion = mensaje;
             this.tipoNotificacion = tipo;
             this.mostrarNotificacion = true;
+
             // Auto-cerrar después de 4 segundos
             setTimeout(() => {
                 this.cerrarNotificacion();
             }, 4000);
         },
+
         cerrarNotificacion() {
             this.mostrarNotificacion = false;
-        },
-        // Guardar carrito en localStorage
-        guardarCarrito() {
-            localStorage.setItem('carrito', JSON.stringify(this.carrito));
-        },
-        // Cargar carrito desde localStorage
-        cargarCarrito() {
-            const carritoGuardado = localStorage.getItem('carrito');
-            if (carritoGuardado) {
-                this.carrito = JSON.parse(carritoGuardado);
-            }
         }
     },
     mounted() {
         console.log('Componente CarritoCompras montado correctamente');
         console.log('Productos cargados:', this.productos.length);
         console.log('Imágenes importadas correctamente');
-        this.cargarCarrito();
     }
-};
+}
 </script>
 
 <style scoped>
-/* Estilos para el scroll del carrito en móviles */
-@media (max-width: 768px) {
-    .carrito-scroll {
-        max-height: 400px;
-        overflow-y: auto;
-    }
-}
 /* Importar estilos específicos del carrito */
 @import '@/assets/carrito-styles.css';
 </style>
